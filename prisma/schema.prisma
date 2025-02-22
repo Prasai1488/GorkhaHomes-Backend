@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  price      Int
+  images     String[]
+  address    String
+  city       String      
+  bedroom    Int
+  bathroom   Int
+  latitude   Float       // Changed to Float for geospatial accuracy
+  longitude  Float       // Changed to Float for geospatial accuracy
+  type       Type
+  property   Property
+  createdAt  DateTime    @default(now())
+  user       User        @relation(fields: [userId], references: [id])
+  userId     String      @db.ObjectId
+  postDetail PostDetail?
+  savedPosts SavedPost[] // Relationship with SavedPost
+  approved   Boolean     @default(false)
+  views      Int         @default(0)  // Added field for tracking views
+}
+
+enum Type {
+  buy
+  rent
+}
+
+enum Property {
+  apartment
+  house
+  condo
+  land
+}
+
+enum PropertyStatus {
+  Available
+  Booked
+  SoldOut
+}
+
+model PostDetail {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  desc           String
+  utilities      String?      
+  pet            String?        // Can store pet policy (e.g., "allowed", "not allowed")
+  income         String?        // Could be income range or a string representing the requirement
+  size           Int?           // Square footage or property size
+  school         Int?           // Distance to nearest school (in minutes or km)
+  bus            Int?           // Distance to nearest bus stop (in minutes or km)
+  restaurant     Int?           // Distance to nearest restaurant (in minutes or km)
+  propertyStatus PropertyStatus @default(Available)
+  post           Post           @relation(fields: [postId], references: [id])
+  postId         String         @unique @db.ObjectId
+}
+
+model SavedPost {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String   @db.ObjectId
+  postId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id                   String         @id @default(auto()) @map("_id") @db.ObjectId
+  email                String         @unique
+  username             String         @unique
+  password             String
+  avatar               String?
+  fullName             String?        // Added Full Name
+  phoneNumber          String?        // Added Phone Number
+  role                 UserRole       @default(USER) // Added Role (admin or user)
+  createdAt            DateTime       @default(now())
+  posts                Post[]         // Relation to Post model
+  savedPosts           SavedPost[]    // Relation to SavedPost model
+  chats                Chat[]         @relation(fields: [chatIDs], references: [id])
+  chatIDs              String[]       @db.ObjectId
+  notifications        Notification[] // Relation to Notification model
+  testimonials         Testimonial[]  // Relation to Testimonials model
+  resetPasswordToken   String?        
+  resetPasswordExpires DateTime?
+}
+
+
+
+model Chat {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  users      User[]    @relation(fields: [userIDs], references: [id])
+  userIDs    String[]  @db.ObjectId
+  createdAt  DateTime  @default(now())
+  seenBy     String[]  @db.ObjectId
+  messages   Message[]
+  lastMessage String?
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  userId    String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  title      String   // Title of the notification
+  message    String   // Detailed message of the notification
+  read       Boolean  @default(false) // Indicates if the notification has been read
+  createdAt  DateTime @default(now()) // Date when the notification was created
+}
+
+model Testimonial {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+}
