@@ -22,7 +22,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       {
         id: user.id, // Ensure the ID is a string
-        isAdmin: false,
+        role: user.role,
       },
       process.env.JWT_SECRET_KEY,
       { expiresIn: age }
@@ -47,7 +47,21 @@ export const register = async (req, res) => {
   let { username, email, password } = req.body;
 
   try {
-    
+    // CHECK IF USER ALREADY EXISTS
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: username },
+          { email: email }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists!" });
+    }
+
+    // HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // CREATE A NEW USER AND SAVE TO DB
@@ -56,6 +70,7 @@ export const register = async (req, res) => {
         username,
         email,
         password: hashedPassword,
+        role: "USER", // Default role (optional)
       },
     });
 
@@ -66,3 +81,7 @@ export const register = async (req, res) => {
   }
 };
 
+
+export const logout = (req, res) => {
+  res.clearCookie("token").status(200).json({ message: "Logout Successful" });
+};
