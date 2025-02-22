@@ -84,8 +84,8 @@ model User {
   username             String         @unique
   password             String
   avatar               String?
-  fullName             String?        // Added Full Name
-  phoneNumber          String?        // Added Phone Number
+  fullName             String?        
+  phoneNumber          String?        
   role                 UserRole       @default(USER) // Added Role (admin or user)
   createdAt            DateTime       @default(now())
   posts                Post[]         // Relation to Post model
