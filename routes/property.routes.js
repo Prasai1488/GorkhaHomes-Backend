@@ -1,11 +1,15 @@
 import express from "express";
-import { createPost } from "../controllers/UserControllers/user.property.controller.js";
+import { createPost,updatePost } from "../controllers/UserControllers/user.property.controller.js";
 import validateReqBody from "../middleware/validation.middleware.js";
 import  postSchema  from "../validation/post.validation.schema.js";
 import { verifyToken } from "../middleware/verify.token.js";
+import validateIdFromReqParams from "../middleware/validate.id.js";
+import { checkUserPostOwnership } from "../middleware/check.user.ownership.js";
 
 const router = express.Router();
 
 router.post("/create-property",verifyToken, validateReqBody(postSchema), createPost);
+router.put("/update-property/:id",validateIdFromReqParams,verifyToken,checkUserPostOwnership ,updatePost);
+
 
 export default router;
