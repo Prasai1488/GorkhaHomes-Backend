@@ -9,4 +9,5 @@ const router = express.Router();
 router.get("/get-user/:id", validateIdFromReqParams,verifyToken, checkUserOwnership, getUser);
 router.put("/update-user/:id", validateIdFromReqParams,verifyToken, checkUserOwnership, updateUser);
 
+
 export default router;
