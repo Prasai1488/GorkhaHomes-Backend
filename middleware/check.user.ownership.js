@@ -3,7 +3,7 @@ import prisma from "../lib/prisma.js";
 export const checkUserOwnership = (req, res, next) => {
   const { id } = req.params;
 
-  // If the authenticated user's ID doesn't match the requested ID, return a 403 error
+  // If the authenticated user's ID doesn't match the requested ID, return error
   if (req.userId !== id) {
     return res
       .status(403)

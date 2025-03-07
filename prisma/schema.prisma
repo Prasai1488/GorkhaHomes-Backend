@@ -7,27 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
-  title      String
-  price      Int
-  images     String[]
-  address    String
-  city       String      
-  bedroom    Int
-  bathroom   Int
-  latitude   Float       // Changed to Float for geospatial accuracy
-  longitude  Float       // Changed to Float for geospatial accuracy
-  type       Type
-  property   Property
-  createdAt  DateTime    @default(now())
-  user       User        @relation(fields: [userId], references: [id])
-  userId     String      @db.ObjectId
-  postDetail PostDetail?
-  savedPosts SavedPost[] // Relationship with SavedPost
-  approved   Boolean     @default(false)
-  views      Int         @default(0)  // Added field for tracking views
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
+
+model Post {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  price       Int
+  images      String[]
+  address     String
+  city        String      
+  bedroom     Int
+  bathroom    Int
+  latitude    Float
+  longitude   Float
+  type        Type
+  property    Property
+  createdAt   DateTime        @default(now())
+  user        User            @relation(fields: [userId], references: [id])
+  userId      String          @db.ObjectId
+  postDetail  PostDetail?
+  savedPosts  SavedPost[] 
+  views       Int             @default(0)
+  status      ApprovalStatus  @default(PENDING) 
+}
+
 
 enum Type {
   buy

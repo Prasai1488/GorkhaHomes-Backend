@@ -22,7 +22,7 @@ export const approvePost = async (req, res) => {
     // Update the post's approval status to true
     const updatedPost = await prisma.post.update({
       where: { id: id },
-      data: { approved: true },
+      data: { status: "APPROVED" },
     });
 
     res.status(200).json({ message: "Post approved successfully!", post: updatedPost });
