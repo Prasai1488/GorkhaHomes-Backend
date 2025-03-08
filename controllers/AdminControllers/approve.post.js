@@ -48,6 +48,7 @@ export const rejectPost = async (req, res) => {
   try {
     const post = await prisma.post.findUnique({
       where: { id: id },
+      include: { user: true }, // ✅ Include user details (email)
     });
 
     if (!post) {
@@ -57,7 +58,7 @@ export const rejectPost = async (req, res) => {
     if (req.userRole !== "ADMIN") {
       return res
         .status(403)
-        .json({ message: "You don't have permission to approve this post." });
+        .json({ message: "You don't have permission to reject this post." });
     }
 
     if (post.status !== "PENDING") {
@@ -68,9 +69,14 @@ export const rejectPost = async (req, res) => {
 
     // Update the post status to REJECTED
     await prisma.post.update({
-      where: { id: postId },
+      where: { id: id },
       data: { status: "REJECTED" },
     });
+
+    // ✅ Ensure we have the user's email
+    if (!post.user || !post.user.email) {
+      return res.status(500).json({ message: "User email not found!" });
+    }
 
     // Send rejection email to user
     await sendRejectionEmail(post.user.email, post.title);
@@ -90,8 +96,11 @@ const sendRejectionEmail = async (userEmail, postTitle) => {
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: process.env.EMAIL_USER, // Your email
-        pass: process.env.EMAIL_PASS, // Your email password or app password
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS, 
+      },
+      tls: {
+        rejectUnauthorized: false, // ✅ Allows self-signed certificates
       },
     });
 
