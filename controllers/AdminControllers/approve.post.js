@@ -6,63 +6,64 @@ export const approvePost = async (req, res) => {
   const { id } = req.params;
 
   try {
-  
     const post = await prisma.post.findUnique({
       where: { id: id },
     });
-
 
     if (!post) {
       return res.status(404).json({ message: "Post not found!" });
     }
 
-    if (req.userRole !== 'ADMIN') {
-      return res.status(403).json({ message: "You don't have permission to approve this post." });
+    if (req.userRole !== "ADMIN") {
+      return res
+        .status(403)
+        .json({ message: "You don't have permission to approve this post." });
     }
 
-    // Update the post's approval status to true
+    if (post.status !== "PENDING") {
+      return res
+        .status(400)
+        .json({ message: "Only pending posts can be approved." });
+    }
+
+    // Update the post's approval status to "APPROVED"
     const updatedPost = await prisma.post.update({
       where: { id: id },
       data: { status: "APPROVED" },
     });
 
-    res.status(200).json({ message: "Post approved successfully!", post: updatedPost });
+    res
+      .status(200)
+      .json({ message: "Post approved successfully!", post: updatedPost });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to approve post!" });
   }
 };
 
-
-
-
 // ? Reject Post (Admin only)
 export const rejectPost = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const { postId } = req.body;
-    const adminId = req.user.id; // Extract admin ID from authentication middleware
-
-    // Ensure the user is an admin (Assuming role-based authentication)
-    const adminUser = await prisma.user.findUnique({
-      where: { id: adminId },
-    });
-
-    if (!adminUser || adminUser.role !== "ADMIN") {
-      return res.status(403).json({ message: "Unauthorized: Only admins can reject posts!" });
-    }
-
-    // Check if the post exists
     const post = await prisma.post.findUnique({
-      where: { id: postId },
-      include: { user: true }, // Fetch user details
+      where: { id: id },
     });
 
     if (!post) {
       return res.status(404).json({ message: "Post not found!" });
     }
 
-    if (post.status === "REJECTED") {
-      return res.status(400).json({ message: "Post is already rejected!" });
+    if (req.userRole !== "ADMIN") {
+      return res
+        .status(403)
+        .json({ message: "You don't have permission to approve this post." });
+    }
+
+    if (post.status !== "PENDING") {
+      return res
+        .status(400)
+        .json({ message: "Only pending posts can be rejected." });
     }
 
     // Update the post status to REJECTED
@@ -74,7 +75,9 @@ export const rejectPost = async (req, res) => {
     // Send rejection email to user
     await sendRejectionEmail(post.user.email, post.title);
 
-    res.status(200).json({ message: "Post rejected successfully and email sent!" });
+    res
+      .status(200)
+      .json({ message: "Post rejected successfully and email sent!" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to reject post!" });
