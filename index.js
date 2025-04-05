@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import userRoute from "./routes/user.routes.js";
 import propertyRoute from "./routes/property.routes.js"; 
 import adminRoute from "./routes/admin.routes.js";
+import chatRoute from "./routes/chat.routes.js";
+import messageRoute from "./routes/message.routes.js";
 
 const app = express();
 
@@ -24,6 +26,12 @@ app.use("/api/property", propertyRoute);
 
 // Route for admin-related operations
 app.use("/api/admin", adminRoute);
+
+// Route for chat-related operations
+app.use("/api/chats", chatRoute);
+
+// Route for message-related operations
+app.use("/api/messages", messageRoute);
 
 // server and network port
 const port = 8090; // 4000 to 10,000
