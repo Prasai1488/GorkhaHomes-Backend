@@ -8,6 +8,7 @@ export const approvePost = async (req, res) => {
   try {
     const post = await prisma.post.findUnique({
       where: { id: id },
+      include: { user: true },
     });
 
     if (!post) {
@@ -26,15 +27,21 @@ export const approvePost = async (req, res) => {
         .json({ message: "Only pending posts can be approved." });
     }
 
-    // Update the post's approval status to "APPROVED"
     const updatedPost = await prisma.post.update({
       where: { id: id },
       data: { status: "APPROVED" },
     });
 
+    if (post.user && post.user.email) {
+      await sendApprovalEmail(post.user.email, post.title);
+    }
+
     res
       .status(200)
-      .json({ message: "Post approved successfully!", post: updatedPost });
+      .json({
+        message: "Post approved successfully and email sent!",
+        post: updatedPost,
+      });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to approve post!" });
@@ -96,8 +103,8 @@ const sendRejectionEmail = async (userEmail, postTitle) => {
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: process.env.EMAIL_USER, 
-        pass: process.env.EMAIL_PASS, 
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
       tls: {
         rejectUnauthorized: false, // ✅ Allows self-signed certificates
@@ -115,5 +122,32 @@ const sendRejectionEmail = async (userEmail, postTitle) => {
     console.log(`Rejection email sent to ${userEmail}`);
   } catch (error) {
     console.error("Error sending rejection email:", error);
+  }
+};
+
+const sendApprovalEmail = async (userEmail, postTitle) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: userEmail,
+      subject: "Your Post Has Been Approved",
+      text: `Dear User,\n\nCongratulations! Your post titled "${postTitle}" has been approved and is now live on our platform.\n\nThank you for contributing.\n\nBest Regards,\nAdmin Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Approval email sent to ${userEmail}`);
+  } catch (error) {
+    console.error("Error sending approval email:", error);
   }
 };
