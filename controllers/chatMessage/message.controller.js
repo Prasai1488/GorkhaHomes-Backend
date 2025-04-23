@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma.js";
+import prisma from "../../lib/prisma.js";
 
 // Function to add a message to a chat
 export const addMessage = async (req, res) => {
