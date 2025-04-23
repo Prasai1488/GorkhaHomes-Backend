@@ -6,8 +6,13 @@ import propertyRoute from "./routes/property.routes.js";
 import adminRoute from "./routes/admin.routes.js";
 import chatRoute from "./routes/chat.routes.js";
 import messageRoute from "./routes/message.routes.js";
+import cors from "cors";
 
 const app = express();
+
+// Middleware to enable Cross-Origin Resource Sharing (CORS) with specific settings
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+
 
 // Middleware to parse JSON bodies in incoming requests
 app.use(express.json());
@@ -22,7 +27,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
 
 // Route for property-related operations
-app.use("/api/property", propertyRoute);
+app.use("/api/posts", propertyRoute);
 
 // Route for admin-related operations
 app.use("/api/admin", adminRoute);
