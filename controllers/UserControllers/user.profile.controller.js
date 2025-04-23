@@ -26,7 +26,6 @@ export const getUser = async (req, res) => {
   }
 };
 
-
 // ? update user profile details by id
 export const updateUser = async (req, res) => {
   const { id } = req.params;
@@ -49,7 +48,9 @@ export const updateUser = async (req, res) => {
     }
 
     if (username) {
-      const existingUsername = await prisma.user.findUnique({ where: { username } });
+      const existingUsername = await prisma.user.findUnique({
+        where: { username },
+      });
       if (existingUsername && existingUsername.id !== id) {
         return res.status(400).json({ message: "Username is already taken!" });
       }
@@ -83,5 +84,80 @@ export const updateUser = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to update user details!" });
+  }
+};
+
+export const getNotificationNumber = async (req, res) => {
+  const tokenUserId = req.userId;
+  try {
+    const number = await prisma.chat.count({
+      where: {
+        userIDs: {
+          hasSome: [tokenUserId],
+        },
+        NOT: {
+          seenBy: {
+            hasSome: [tokenUserId],
+          },
+        },
+      },
+    });
+    res.status(200).json(number);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed to get profile posts!" });
+  }
+};
+
+export const profilePosts = async (req, res) => {
+  const tokenUserId = req.userId;
+
+  try {
+    // Fetch and group posts by status
+    const approvedPosts = await prisma.post.findMany({
+      where: {
+        userId: tokenUserId,
+        status: "APPROVED",
+      },
+      include: { postDetail: true },
+    });
+
+    const pendingPosts = await prisma.post.findMany({
+      where: {
+        userId: tokenUserId,
+        status: "PENDING",
+      },
+      include: { postDetail: true },
+    });
+
+    const rejectedPosts = await prisma.post.findMany({
+      where: {
+        userId: tokenUserId,
+        status: "REJECTED",
+      },
+      include: { postDetail: true },
+    });
+
+    // Fetch saved posts
+    const saved = await prisma.savedPost.findMany({
+      where: { userId: tokenUserId },
+      include: {
+        post: {
+          include: { postDetail: true },
+        },
+      },
+    });
+
+    const savedPosts = saved.map((item) => item.post);
+
+    res.status(200).json({
+      approvedPosts,
+      pendingPosts,
+      rejectedPosts,
+      savedPosts,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed to get profile posts!" });
   }
 };
