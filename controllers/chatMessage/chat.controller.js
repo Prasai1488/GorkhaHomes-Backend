@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma.js";
+import prisma from "../../lib/prisma.js";
 
 // Function to get all chats for the authenticated user
 export const getChats = async (req, res) => {
