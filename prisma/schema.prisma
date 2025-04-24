@@ -93,17 +93,19 @@ model User {
   avatar               String?
   fullName             String?        
   phoneNumber          String?        
-  role                 UserRole       @default(USER) // Added Role (admin or user)
+  role                 UserRole       @default(USER)
+  active               Boolean        @default(true) 
   createdAt            DateTime       @default(now())
-  posts                Post[]         // Relation to Post model
-  savedPosts           SavedPost[]    // Relation to SavedPost model
+  posts                Post[]         
+  savedPosts           SavedPost[]    
   chats                Chat[]         @relation(fields: [chatIDs], references: [id])
   chatIDs              String[]       @db.ObjectId
-  notifications        Notification[] // Relation to Notification model
-  testimonials         Testimonial[]  // Relation to Testimonials model
+  notifications        Notification[] 
+  testimonials         Testimonial[]  
   resetPasswordToken   String?        
   resetPasswordExpires DateTime?
 }
+
 
 
 
@@ -130,17 +132,32 @@ model Notification {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   user       User     @relation(fields: [userId], references: [id])
   userId     String   @db.ObjectId
-  title      String   // Title of the notification
-  message    String   // Detailed message of the notification
-  read       Boolean  @default(false) // Indicates if the notification has been read
-  createdAt  DateTime @default(now()) // Date when the notification was created
+
+  title      String                     // e.g., "New Post Pending"
+  message    String                     // e.g., "Post titled 'Luxury Flat' is pending"
+  read       Boolean  @default(false)   // Read/unread status
+  createdAt  DateTime @default(now())
+
+  // NEW fields to support system notifications
+  type       String?                    // "POST" | "TESTIMONIAL" | "INFO" (optional)
+  entityId   String?                    // ID of the post/testimonial (optional)
+}
+
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Testimonial {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
-  userId    String   @db.ObjectId
+  userId    String   @unique @db.ObjectId
   rating    Int
   comment   String
+  status     TestimonialStatus @default(PENDING)
   createdAt DateTime @default(now())
+
 }
+

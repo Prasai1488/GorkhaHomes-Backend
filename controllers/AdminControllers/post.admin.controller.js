@@ -111,3 +111,74 @@ export const adminDeletePost = async (req, res) => {
     res.status(500).json({ message: "Failed to delete post." });
   }
 };
+
+// ? admin update or edit any posts
+export const adminUpdatePost = async (req, res) => {
+    const { id } = req.params;
+    const {
+      title,
+      price,
+      images,
+      address,
+      city,
+      bedroom,
+      bathroom,
+      latitude,
+      longitude,
+      type,
+      property,
+      postDetail,
+    } = req.body;
+  
+    try {
+      // ✅ Admin-only access check
+      if (req.userRole !== "ADMIN") {
+        return res.status(403).json({ message: "Unauthorized: Admin only." });
+      }
+  
+      // ✅ Check if post exists
+      const post = await prisma.post.findUnique({ where: { id } });
+  
+      if (!post) {
+        return res.status(404).json({ message: "Post not found!" });
+      }
+  
+      // ✅ Prepare update data (same as user function)
+      const updatedData = {
+        title,
+        price,
+        images,
+        address,
+        city,
+        bedroom,
+        bathroom,
+        latitude,
+        longitude,
+        type,
+        property,
+        postDetail: postDetail ? { update: postDetail } : undefined,
+      };
+  
+      // ✅ Remove undefined fields to avoid null overwrites
+      Object.keys(updatedData).forEach((key) => {
+        if (updatedData[key] === undefined) {
+          delete updatedData[key];
+        }
+      });
+  
+      const updatedPost = await prisma.post.update({
+        where: { id },
+        data: updatedData,
+        include: { postDetail: true },
+      });
+  
+      res.status(200).json({
+        message: "Post updated successfully by admin.",
+        post: updatedPost,
+      });
+    } catch (err) {
+      console.error("Admin failed to update post:", err);
+      res.status(500).json({ message: "Failed to update post!" });
+    }
+  };
+  

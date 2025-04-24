@@ -78,7 +78,7 @@ export const updatePost = async (req, res) => {
     }
 
     // Check if the post is approved
-    if (!post.approved) {
+    if (post.status !== "APPROVED") {
       return res
         .status(400)
         .json({ message: "Post must be approved before updating." });
@@ -164,7 +164,6 @@ export const getApprovedPosts = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch approved posts!" });
   }
 };
-
 
 // ? save or unsave post :
 export const savePost = async (req, res) => {

@@ -6,6 +6,7 @@ import propertyRoute from "./routes/property.routes.js";
 import adminRoute from "./routes/admin.routes.js";
 import chatRoute from "./routes/chat.routes.js";
 import messageRoute from "./routes/message.routes.js";
+import testimonialRoute from "./routes/testimonial.routes.js";
 import cors from "cors";
 
 const app = express();
@@ -37,6 +38,9 @@ app.use("/api/chats", chatRoute);
 
 // Route for message-related operations
 app.use("/api/messages", messageRoute);
+
+// Route for testimonial-related operations
+app.use("/api/testimonials", testimonialRoute);
 
 // server and network port
 const port = 8090; // 4000 to 10,000

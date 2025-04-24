@@ -125,6 +125,8 @@ const sendRejectionEmail = async (userEmail, postTitle) => {
   }
 };
 
+
+// ? Function to send approval email
 const sendApprovalEmail = async (userEmail, postTitle) => {
   try {
     const transporter = nodemailer.createTransport({
