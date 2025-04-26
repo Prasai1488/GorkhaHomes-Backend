@@ -27,7 +27,6 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET_KEY,
       { expiresIn: age }
     );
-    
 
     const { password: userPassword, ...userInfo } = user;
 
@@ -51,11 +50,8 @@ export const register = async (req, res) => {
     // CHECK IF USER ALREADY EXISTS
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { username: username },
-          { email: email }
-        ]
-      }
+        OR: [{ username: username }, { email: email }],
+      },
     });
 
     if (existingUser) {
@@ -81,7 +77,6 @@ export const register = async (req, res) => {
     res.status(500).json({ message: "Failed to create user!" });
   }
 };
-
 
 export const logout = (req, res) => {
   res.clearCookie("token").status(200).json({ message: "Logout Successful" });

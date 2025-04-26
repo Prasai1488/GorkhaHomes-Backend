@@ -1,8 +1,57 @@
 import prisma from "../../lib/prisma.js";
 
-export const createPost = async (req, res) => {
-  const body = req.body;
+// ? create post without admin getting notification function
+// export const createPost = async (req, res) => {
+//   const body = req.body;
 
+//   const {
+//     title,
+//     price,
+//     images,
+//     address,
+//     city,
+//     bedroom,
+//     bathroom,
+//     latitude,
+//     longitude,
+//     type,
+//     property,
+//     postDetail,
+//   } = body;
+//   const userId = req.userId;
+
+//   try {
+//     const newPost = await prisma.post.create({
+//       data: {
+//         title,
+//         price,
+//         images,
+//         address,
+//         city,
+//         bedroom,
+//         bathroom,
+//         latitude,
+//         longitude,
+//         type,
+//         property,
+//         userId,
+//         postDetail: postDetail
+//           ? { create: postDetail } // If postDetail is provided, create a PostDetail record
+//           : undefined, // If not provided, postDetail will not be created
+//       },
+//     });
+
+//     res
+//       .status(201)
+//       .json({ message: "Post created successfully!", post: newPost });
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: "Failed to create post!" });
+//   }
+// };
+
+// ? create post with admin getting notification function
+export const createPost = async (req, res) => {
   const {
     title,
     price,
@@ -16,7 +65,7 @@ export const createPost = async (req, res) => {
     type,
     property,
     postDetail,
-  } = body;
+  } = req.body;
   const userId = req.userId;
 
   try {
@@ -34,11 +83,23 @@ export const createPost = async (req, res) => {
         type,
         property,
         userId,
-        postDetail: postDetail
-          ? { create: postDetail } // If postDetail is provided, create a PostDetail record
-          : undefined, // If not provided, postDetail will not be created
+        postDetail: postDetail ? { create: postDetail } : undefined,
       },
     });
+
+    const admin = await prisma.user.findFirst({ where: { role: "ADMIN" } });
+
+    if (admin) {
+      await prisma.notification.create({
+        data: {
+          userId: admin.id,
+          title: "New Post Pending Approval",
+          message: `Post titled "${title}" requires admin review.`,
+          type: "POST",
+          entityId: newPost.id,
+        },
+      });
+    }
 
     res
       .status(201)
@@ -199,5 +260,49 @@ export const savePost = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed save post!" });
+  }
+};
+
+// ? delete post :
+export const deletePost = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    // ✅ Fetch the post and its related data
+    const post = await prisma.post.findUnique({
+      where: { id },
+      include: {
+        postDetail: true,
+        savedPosts: true,
+      },
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // ✅ Delete related saved posts
+    if (post.savedPosts.length > 0) {
+      await prisma.savedPost.deleteMany({
+        where: { postId: id },
+      });
+    }
+
+    // ✅ Delete post detail
+    if (post.postDetail) {
+      await prisma.postDetail.delete({
+        where: { id: post.postDetail.id },
+      });
+    }
+
+    // ✅ Finally delete the post
+    await prisma.post.delete({
+      where: { id },
+    });
+
+    res.status(200).json({ message: "Post deleted successfully." });
+  } catch (err) {
+    console.error("Admin failed to delete post:", err);
+    res.status(500).json({ message: "Failed to delete post." });
   }
 };
