@@ -16,8 +16,15 @@ import {
   unsuspendUser,
 } from "../controllers/AdminControllers/user.admin.controller.js";
 import { getAdminDashboardStats } from "../controllers/AdminControllers/admin.dashboard.controller.js";
-import { approveTestimonial,rejectTestimonial,getTestimonialsByStatus } from "../controllers/AdminControllers/testimonial.admin.controller.js";
-
+import {
+  approveTestimonial,
+  rejectTestimonial,
+  getTestimonialsByStatus,
+} from "../controllers/AdminControllers/testimonial.admin.controller.js";
+import {
+  getAdminNotifications,
+  markNotificationAsRead,
+} from "../controllers/AdminControllers/admin.notification.controller.js";
 
 const router = express.Router();
 
@@ -62,10 +69,8 @@ router.patch(
   verifyToken,
   rejectTestimonial
 );
-router.get(
-  "/testimonials",
-  verifyToken,
-  getTestimonialsByStatus
-);
+router.get("/testimonials", verifyToken, getTestimonialsByStatus);
+router.get("/notifications", verifyToken, getAdminNotifications);
+router.patch("/notifications/:id/read", verifyToken, markNotificationAsRead);
 
 export default router;
