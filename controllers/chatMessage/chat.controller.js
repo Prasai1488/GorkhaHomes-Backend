@@ -20,6 +20,11 @@ export const getChats = async (req, res) => {
       // Finding the ID of the other participant in the chat
       const receiverId = chat.userIDs.find((id) => id !== tokenUserId);
 
+      if (!receiverId) {
+        chat.receiver = null; // or skip adding receiver
+        continue;
+      }
+
       // Fetching receiver details
       const receiver = await prisma.user.findUnique({
         where: {
@@ -159,7 +164,9 @@ export const deleteChat = async (req, res) => {
 
     // If the chat does not exist or the user is not a participant, return 404
     if (!chat || !chat.userIDs.includes(tokenUserId)) {
-      return res.status(404).json({ message: "Chat not found or user not authorized!" });
+      return res
+        .status(404)
+        .json({ message: "Chat not found or user not authorized!" });
     }
 
     // Delete related messages
@@ -184,4 +191,3 @@ export const deleteChat = async (req, res) => {
     res.status(500).json({ message: "Failed to delete chat!" });
   }
 };
-
