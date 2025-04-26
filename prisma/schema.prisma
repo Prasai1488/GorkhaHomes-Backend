@@ -20,8 +20,8 @@ model Post {
   images      String[]
   address     String
   city        String      
-  bedroom     Int
-  bathroom    Int
+  bedroom     Int?
+  bathroom    Int?
   latitude    Float
   longitude   Float
   type        Type
@@ -57,17 +57,58 @@ enum PropertyStatus {
 model PostDetail {
   id             String         @id @default(auto()) @map("_id") @db.ObjectId
   desc           String
-  utilities      String?      
-  pet            String?        // Can store pet policy (e.g., "allowed", "not allowed")
-  income         String?        // Could be income range or a string representing the requirement
-  size           Int?           // Square footage or property size
-  school         Int?           // Distance to nearest school (in minutes or km)
-  bus            Int?           // Distance to nearest bus stop (in minutes or km)
-  restaurant     Int?           // Distance to nearest restaurant (in minutes or km)
+  utilities      String?
+  pet            String?
+  income         String?
+  size           Int?
+  school         Int?
+  bus            Int?
+  restaurant     Int?
   propertyStatus PropertyStatus @default(Available)
+
+  // 🏡 Property Area & Road
+  totalArea      Int?
+  buildUpArea    Int?
+  dimension      String?
+  roadType       String?
+  propertyFace   String?
+  roadAccess     Int?
+
+  // 🛋️ Additional Details
+  kitchen        Int?
+  livingRoom     Int?
+  parking        Int?
+  totalFloors    Int?
+  builtYear      String?
+  furnishing     String?
+  plotNumber     String?
+  propertyCode   String?
+  collection     String?
+  amenities      String[]       // Array for multiple selections
+
+  // 🗺️ Nearby Location
+  landmark        String?
+  hospital        String?
+  airport         String?
+  pharmacy        String?
+  bhatbhateni     String?
+  college         String?
+  gym             String?
+  publicTransport String?
+  policeStation   String?
+  pashupatinath   String?
+  boudhanath      String?
+  atm             String?
+  hotel           String?
+  nearbyRestaurant String?
+  banquet         String?
+  wardOffice      String?
+  ringRoad        String?
+
   post           Post           @relation(fields: [postId], references: [id])
   postId         String         @unique @db.ObjectId
 }
+
 
 model SavedPost {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId

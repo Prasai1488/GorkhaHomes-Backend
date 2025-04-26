@@ -1,5 +1,5 @@
 import express from "express";
-import { getUser,updateUser,getNotificationNumber,profilePosts, } from "../controllers/UserControllers/user.profile.controller.js";
+import { getUser,updateUser,getNotificationNumber,profilePosts,deleteUser } from "../controllers/UserControllers/user.profile.controller.js";
 import { verifyToken } from "../middleware/verify.token.js";
 import { checkUserOwnership } from "../middleware/check.user.ownership.js";
 import validateIdFromReqParams from "../middleware/validate.id.js";
@@ -14,6 +14,7 @@ router.get("/notification", verifyToken, getNotificationNumber);
 router.get("/profilePosts", verifyToken, profilePosts);
 router.get("/user", getCurrentUser);
 router.post("/save", verifyToken, savePost);
+router.delete("/delete/:id", validateIdFromReqParams, verifyToken,  deleteUser);
 
 export default router;
 
