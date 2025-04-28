@@ -36,12 +36,10 @@ export const approvePost = async (req, res) => {
       await sendApprovalEmail(post.user.email, post.title);
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Post approved successfully and email sent!",
-        post: updatedPost,
-      });
+    res.status(200).json({
+      message: "Post approved successfully and email sent!",
+      post: updatedPost,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to approve post!" });
@@ -124,7 +122,6 @@ const sendRejectionEmail = async (userEmail, postTitle) => {
     console.error("Error sending rejection email:", error);
   }
 };
-
 
 // ? Function to send approval email
 const sendApprovalEmail = async (userEmail, postTitle) => {

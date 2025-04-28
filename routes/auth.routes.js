@@ -8,7 +8,7 @@ import {
 
 const router = express.Router();
 
-router.post("/register", validateReqBody(registerValidationSchema), register);
+router.post("/register",  register);
 router.post("/login", validateReqBody(loginValidationSchema), login);
 router.post("/logout", logout);
 

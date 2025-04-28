@@ -16,7 +16,7 @@ enum ApprovalStatus {
 model Post {
   id          String          @id @default(auto()) @map("_id") @db.ObjectId
   title       String
-  price       Int
+  price       String
   images      String[]
   address     String
   city        String      

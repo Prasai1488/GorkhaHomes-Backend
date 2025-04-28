@@ -8,6 +8,7 @@ import chatRoute from "./routes/chat.routes.js";
 import messageRoute from "./routes/message.routes.js";
 import testimonialRoute from "./routes/testimonial.routes.js";
 import resetRoute from "./routes/reset.password.route.js";
+import recommendationRoute from "./routes/recommendation.routes.js";
 import cors from "cors";
 
 const app = express();
@@ -44,6 +45,9 @@ app.use("/api/testimonials", testimonialRoute);
 
 // Route for password reset operations
 app.use("/api/reset", resetRoute);
+
+// Route for recommendation-related operations
+app.use("/api/recommendations", recommendationRoute);
 
 // server and network port
 const port = 8090; // 4000 to 10,000
